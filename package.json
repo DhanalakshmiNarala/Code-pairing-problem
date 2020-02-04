@@ -1,0 +1,27 @@
+{
+  "name": "Code-pairing-problem",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/main.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha || true"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DhanalakshmiNarala/Code-pairing-problem.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DhanalakshmiNarala/Code-pairing-problem/issues"
+  },
+  "homepage": "https://github.com/DhanalakshmiNarala/Code-pairing-problem#readme",
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^7.0.1"
+  }
+}
