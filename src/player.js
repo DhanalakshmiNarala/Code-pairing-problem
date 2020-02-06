@@ -4,6 +4,7 @@ class Player {
     this.scoresProbability = probArr;
     this.totalBalls = 0;
     this.totalRuns = 0;
+    this.isEliminated = false;
   }
 
   getScore() {
@@ -28,7 +29,9 @@ class Player {
   play() {
     this.totalBalls += 1;
     let runs = this.getScore();
-    if (runs !== 7) {
+    if (runs === 7) {
+      this.isEliminated = true;
+    } else {
       this.totalRuns += runs;
     }
     return runs;

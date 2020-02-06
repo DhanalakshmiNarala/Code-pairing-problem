@@ -5,80 +5,108 @@ class Cricket {
   oversRemaining;
   runsNeeded;
   currentStriker;
+  commetary = [];
 
-  setOversRemaining(overs) {
-    this.oversRemaining = overs;
-  }
-
-  setRunsNeeded(runs) {
-    this.runsNeeded = runs;
+  constructor(oversRemaining, runsNeeded, players) {
+    this.oversRemaining = oversRemaining;
+    this.runsNeeded = runsNeeded;
+    this.setPlayersRemaining(players);
   }
 
   setPlayersRemaining(players) {
-    for (let player of players) {
-      this.insertPlayer(player);
+    this.players = players.map(player => {
+      return new Player(player.name, player.scoresProbability);
+    });
+  }
+
+  changeStriker() {
+    let playersLeft = this.players.filter(player => {
+      if (!player.isEliminated) return player;
+    });
+    if (playersLeft.length === 0) {
+      throw 'No players left and Match over';
     }
+    let playerIndex = getRandomNumber(0, playersLeft.length);
+    this.currentStriker = playersLeft[playerIndex];
   }
 
-  insertPlayer(player) {
-    let newPlayer = new Player(player.name, player.scoresProbability);
-    this.players.push(newPlayer);
+  canChangeStriker(prevRuns) {
+    return prevRuns === 1 || prevRuns === 3 || prevRuns === 5;
   }
 
-  changeStriker(isOverCompleted = false, score) {
-    if (isOverCompleted || score === 1 || score === 3 || score === 5) {
-      let playerIndex = getRandomNumber(0, this.players.length);
-      this.currentStriker = this.players[playerIndex];
-    }
-  }
-
-  getMatchCommentary() {
-    console.log('Sample commetary');
-    let runs = null;
+  playInnings() {
+    let commetary = [];
+    this.changeStriker();
     for (let overs = 0; overs < this.oversRemaining; overs++) {
-      console.log(
+      commetary.push(
         `\n${this.oversRemaining - overs} overs left. ${
           this.runsNeeded
         } runs to win\n`
       );
+      this.playSingleOver(overs);
+      this.changeStriker();
+    }
+    this.commetary.push('You loose the match');
+    return;
+  }
 
-      this.changeStriker(true, runs);
-      for (let balls = 1; balls <= 6; balls++) {
-        this.changeStriker(balls === 6, runs);
-        runs = this.currentStriker.play();
-        if (runs !== 7) {
-          console.log(
-            `${overs}.${balls}\t${this.currentStriker.name} scores ${runs} runs`
-          );
-        }
+  playSingleOver(over) {
+    let prevRuns = null;
+    for (let balls = 1; balls <= 6; balls++) {
+      if (this.canChangeStriker(prevRuns)) {
+        this.changeStriker();
+      }
+      let runs = this.currentStriker.play();
+      if (this.currentStriker.isEliminated) {
+        this.commetary.push(
+          `${over}.${balls}\t${this.currentStriker.name} out`
+        );
+        this.changeStriker();
+      } else {
+        this.commetary.push(
+          `${over}.${balls}\t${this.currentStriker.name} scores ${runs} runs`
+        );
+        this.runsNeeded -= runs;
+        prevRuns = runs;
+      }
+      if (this.runsNeeded <= 0) {
+        this.commetary.push('Match over banglore own the match');
+        return;
       }
     }
   }
 
+  getMatchCommentary() {
+    this.playInnings();
+    console.log('Sample commetary');
+    return this.commetary.join('\n');
+  }
+
   getMatchResult() {
-    this.getMatchCommentary();
-    console.log('------------------ Final Match results ---------');
-    for (let player of this.players) {
-      console.log(
-        `${player.name} - ${player.totalRuns}(${player.totalBalls} balls)`
-      );
-    }
+    let result = this.players.map(player => {
+      return `${player.name} - ${player.totalRuns}(${player.totalBalls} balls)`;
+    });
+    return result.join('\n');
   }
 
   main() {
-    this.setOversRemaining(4);
-    this.setRunsNeeded(40);
-    this.setPlayersRemaining([
-      { name: 'Kirat boli', scoresProbability: [5, 30, 25, 10, 15, 1, 9, 5] },
-      { name: 'N.S Nodhi', scoresProbability: [10, 40, 20, 5, 10, 1, 4, 10] },
-      { name: 'R Rumrah', scoresProbability: [20, 30, 15, 5, 5, 1, 4, 20] },
-      { name: 'Shashi Henra', scoresProbability: [30, 25, 5, 0, 5, 1, 4, 30] }
-    ]);
-    this.getMatchResult();
+    try {
+      console.log(this.getMatchCommentary());
+    } catch (error) {
+      console.error(error);
+    }
+    console.log('\nMatch result\n');
+    console.log(this.getMatchResult());
   }
 }
 
-let cricket = new Cricket();
+let players = [
+  { name: 'Kirat boli', scoresProbability: [5, 30, 25, 10, 15, 1, 9, 5] },
+  { name: 'N.S Nodhi', scoresProbability: [10, 40, 20, 5, 10, 1, 4, 10] },
+  { name: 'R Rumrah', scoresProbability: [20, 30, 15, 5, 5, 1, 4, 20] },
+  { name: 'Shashi Henra', scoresProbability: [30, 25, 5, 0, 5, 1, 4, 30] }
+];
+let cricket = new Cricket(4, 40, players);
 cricket.main();
 
 module.exports = Cricket;
